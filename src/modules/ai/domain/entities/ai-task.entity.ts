@@ -4,8 +4,6 @@ import { Result } from '@/core/domain/result';
 import { Guard } from '@/core/domain/guard';
 import { DomainEvents } from '@/core/domain/domain-events';
 
-import { ProviderName } from '../value-objects/provider-name.vo';
-import { ModelName } from '../value-objects/model-name.vo';
 import { TokensUsage } from '../value-objects/tokens-usage.vo';
 import { AiTaskCreatedEvent } from '../events/ai-task-created.event';
 import { AiTaskStartedEvent } from '../events/ai-task-started.event';
@@ -20,8 +18,6 @@ interface AiTaskProps {
   projectId?: string | null;
   type: AiTaskType;
   status: AiTaskStatus;
-  provider: ProviderName;
-  model: ModelName;
   payload: Record<string, any>;
   result?: Record<string, any> | null;
   errorMessage?: string | null;
@@ -85,10 +81,6 @@ export class AiTask extends AggregateRoot<AiTaskProps> {
     return this.props.status;
   }
 
-  get model(): ModelName {
-    return this.props.model;
-  }
-
   get payload(): Record<string, any> {
     return this.props.payload;
   }
@@ -125,18 +117,18 @@ export class AiTask extends AggregateRoot<AiTaskProps> {
     tenantId?: string | null;
     projectId?: string | null;
     type: AiTaskType;
-    provider: ProviderName;
-    model: ModelName;
     payload: Record<string, any>;
     now?: Date;
   }): Result<AiTask> {
-    const { tenantId, projectId, type, provider, model, payload, now } = params;
+    const { tenantId, projectId, type, payload, now } = params;
 
     try {
       Guard.againstNullOrUndefined({ argument: type, argumentName: 'type' });
-      Guard.againstNullOrUndefined({ argument: provider, argumentName: 'provider' });
-      Guard.againstNullOrUndefined({ argument: model, argumentName: 'model' });
       Guard.againstNullOrUndefined({ argument: payload, argumentName: 'payload' });
+      Guard.againstNullOrUndefined({ argument: payload.config.provider, argumentName: 'provider' });
+      Guard.againstNullOrUndefined({ argument: payload.config.model, argumentName: 'model' });
+      Guard.againstNullOrUndefined({ argument: payload.messages, argumentName: 'messages' });
+      Guard.againstEmptyArray({ argument: payload.messages, argumentName: 'messages' });
 
       const timestamp = now ?? new Date();
 
@@ -145,8 +137,6 @@ export class AiTask extends AggregateRoot<AiTaskProps> {
         projectId: projectId ?? null,
         type,
         status: 'queued',
-        provider,
-        model,
         payload,
         result: null,
         errorMessage: null,

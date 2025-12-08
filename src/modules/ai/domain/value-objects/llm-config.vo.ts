@@ -83,10 +83,6 @@ export class LLMConfig extends ValueObject<LLMConfigProps> {
         });
       }
 
-      if (stop && stop.length === 0) {
-        throw new Error('stop array cannot be empty');
-      }
-
       const props: LLMConfigProps = {
         provider,
         model,
