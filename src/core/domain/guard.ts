@@ -10,6 +10,15 @@ export class Guard {
     }
   }
 
+  static againstEmptyArray({ argument, argumentName }: GuardArgument): void {
+    if (!Array.isArray(argument)) {
+      throw new Error(`${argumentName} is not an array`);
+    }
+    if (Array.isArray(argument) && argument.length === 0) {
+      throw new Error(`${argumentName} is an empty array`);
+    }
+  }
+
   static againstEmptyString({ argument, argumentName }: GuardArgument): void {
     if (typeof argument !== 'string') {
       throw new Error(`${argumentName} is not a string`);
